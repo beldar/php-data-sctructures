@@ -9,12 +9,12 @@ include "ListNode.php";
 
 class LinkedList {
     private $head;
-    private $previous;
+    private $current;
     private $count;
     
     public function __construct() {
         $this->head = new ListNode(NULL); //Dummy node
-        $this->previous = $this->head;
+        $this->current = $this->head;
         $this->count = 0;
     }
     
@@ -28,25 +28,25 @@ class LinkedList {
     
     public function insert($element){
         $aux = new ListNode($element);
-        $aux->setNext($this->previous->getNext());
-        $this->previous->setNext($aux);
-        $this->previous = $aux;
+        $aux->setNext($this->current->getNext());
+        $this->current->setNext($aux);
+        $this->current = $aux;
         $this->count++;
     }
     
     public function getElement(){
         $e = false;
-        if($this->previous->getNext()!=NULL)
-            $e = $this->previous->getNext()->getElement();
+        if($this->current->getNext()!=NULL)
+            $e = $this->current->getNext()->getElement();
         return $e;
     }
     
     public function remove(){
-        if($this->previous->getNext()==NULL)
+        if($this->current->getNext()==NULL)
             return false;
         else{
-            $aux = $this->previous->getNext();
-            $this->previous->setNext($aux->getNext());
+            $aux = $this->current->getNext();
+            $this->current->setNext($aux->getNext());
             unset($aux);
             if($this->count>0) $this->count--;
             return true;
@@ -54,20 +54,20 @@ class LinkedList {
     }
     
     public function forward(){
-        if($this->previous->getNext()==NULL)
+        if($this->current->getNext()==NULL)
             return false;
         else{
-            $this->previous = $this->previous->getNext();
+            $this->current = $this->current->getNext();
             return true;
         }
     }
     
     public function end(){
-        return $this->previous->getNext()==NULL;
+        return $this->current->getNext()==NULL;
     }
     
     public function goBegin(){
-        $this->previous = $this->head;
+        $this->current = $this->head;
     }
     
     public function clear(){
@@ -77,7 +77,7 @@ class LinkedList {
             $this->forward();
         }
         $this->head = new ListNode(NULL); //Dummy node
-        $this->previous = $this->head;
+        $this->current = $this->head;
         $this->count = 0;
     }
     

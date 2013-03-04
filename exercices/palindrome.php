@@ -31,13 +31,94 @@ while($n>0){
     $n--;
 }
 while($op = array_pop($fifo)){
-    $ints = array();
-    for($i=0;$i<strlen($op)-2;$i++)
-        if($op[$i]!="") $ints[] = intval($op[$i]);
-    $r = nextpal($ints);
-    print implode("",$r)."\n";
+    nextpal(trim($op));
 }
+function nextpal($str){
+    if(checknine($str)){
+        $fh = str_replace ("9", "0", $fh);
+        $fh[0] = "1";
+        print $fh;
+        print "1";
+    }else{
+        $n = strlen($str);
+        $half = ceil(strlen($str)/2);
+        $lsmall = false;
+        $i = $half-1;
+        $j = ($n%2)?$half+1:$half;
+    }
+    
+}
+
+function checknine($str){
+    $isnine = true;
+    for($i=0;$i<strlen($str);$i++){
+        if($str[$i]!="9"){
+            $isnine = false;
+            break;
+        }    
+    }
+    return $isnine;
+}
+/**
+ * Version 4
+ * function nextpal($str){
+    $half = ceil(strlen($str)/2)-1;
+    $fh = str_split($str, $half);
+    $fh = $fh[0];
+    $piv1 = intval($str[$half]);
+    $piv2 = intval($str[++$half]);
+    $in = false;
+    if($piv1==9 && $piv2!=9)
+        $piv = 9;
+    elseif($piv1==9 && $piv2==9){
+        $piv = 0;
+        $in = checknine($str);
+        if($in){
+            $fh = str_replace ("9", "0", $fh);
+            $fh[0] = "1";
+            $piv = "0";
+        }else{
+            $a = $fh[strlen($fh)-1];
+            $fh[strlen($fh)-1]=++$a;
+        }
+    }elseif($piv1>=$piv2){
+        $piv=$piv1;
+    }else
+        $piv = $piv1+1;
+    print $fh.$piv;
+    if(strlen($str)%2==0)
+        print $piv;
+    if($in) 
+        print $piv;
+    print strrev($fh)."\n";
+}
+
+function checknine($str){
+    $isnine = true;
+    for($i=0;$i<strlen($str);$i++){
+        if($str[$i]!="9"){
+            $isnine = false;
+            break;
+        }    
+    }
+    return $isnine;
+}*/
+/**
+ * Version 3
 function nextpal($ints){
+    $r=array();
+    for($i=0;$i<ceil(count($ints)/2)-1;$i++){
+        $r[]=$ints[$i];
+        print $ints[$i];
+    }
+    $p=++$ints[$i];
+    print $p;
+    if(count($ints)%2==0)
+        print $p;
+    print implode("",$r)."\n";
+}*/
+/* Version 2
+ * function nextpal($ints){
     $parts = array_chunk($ints, ceil(count($ints)/2));
     if(count($parts[0])>count($parts[1])){
         $pivot = array_pop($parts[0]);
@@ -52,8 +133,9 @@ function nextpal($ints){
     }
     unset($parts);
     return $r;
-}
-/*function nextpal($ints){
+}*/
+/* Version 1
+ * function nextpal($ints){
     $r = false;
     while(!$r && count($ints)<1000000){
         $ints = increment($ints,count($ints)-1);

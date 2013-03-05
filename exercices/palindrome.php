@@ -22,6 +22,16 @@ Input:
 Output:
 818
 2222
+ * 
+ * Difficult test cases:
+ * 7957 -> 7997
+ * 9789 -> 9889
+ * 1 -> 2
+ * 999 -> 1001
+ * 4599954 -> 4600064
+ * 45874 -> 45954
+ * 100100 -> 101101
+ * 94187978322 -> 94188088149
  */
 $n = intval(fgets( STDIN ));
 $fifo = array();
@@ -31,24 +41,86 @@ while($n>0){
     $n--;
 }
 while($op = array_pop($fifo)){
-    nextpal(trim($op));
+    print nextpal(trim($op))."\n";
 }
 function nextpal($str){
-    if(checknine($str)){
-        $fh = str_replace ("9", "0", $fh);
-        $fh[0] = "1";
-        print $fh;
-        print "1";
+    if(strlen($str)==1 && $str!="9")
+        return ++$str;
+    elseif(checknine($str)){
+        //print "Case all nines\n";
+        $str = str_replace ("9", "0", $str);
+        $str[0] = "1";
+        return $str."1";
     }else{
         $n = strlen($str);
-        $half = ceil(strlen($str)/2);
-        $lsmall = false;
-        $i = $half-1;
-        $j = ($n%2)?$half+1:$half;
+        $h = floor(strlen($str)/2);
+        $isodd = ($n%2==1);
+        $i = $h-1;
+        $j = $isodd?$h+1:$h;
+        if($str[$i]!=$str[$j] && $str[$i]!=9 && $str[$j]!=9){
+            if($str[$i]>$str[$j]){
+                //print "Case left side largest\n";
+                return getmirror($str,$h,$isodd,false);
+            }elseif($str[$i]<$str[$j] && $str[$i]!=9 && $str[$j]!=9){
+                //print "Case right side largest\n";
+                return getmirror($str,$h,$isodd,true);
+            }
+        }else{
+            //print "Case more complex\n";
+            $ls = false;
+            while($i>0 && $str[$i]==$str[$j]){
+                $i--;
+                $j++;
+            }
+            if($i==0 || $str[$i]<$str[$j])
+                $ls = true;
+            if($ls){
+                $carry = 1;
+                $i=$h-1;
+                if($isodd){
+                    $aux = $str[$h]+$carry;
+                    $carry = $aux/10;
+                    $str[$h] = $aux%10;
+                    $j = $h+1;
+                }else
+                    $j = $h;
+                while($i>=0 && $carry!=0){
+                    $aux = $str[$i]+$carry;
+                    $carry = $aux/10;
+                    $str[$i] = $aux%10;
+                    $str[$j++] = $str[$i--];
+                }
+                return $str;
+            }else
+                return getmirror($str,$h,$isodd,false);
+                
+        }
     }
     
 }
 
+function getmirror($str,$h,$isodd,$ls){
+    if($ls){
+        $fh = str_split($str, $h);
+        $fh = $fh[0];
+        $end = strlen($fh)-1;
+        $piv = intval($fh[$end]);
+        if($isodd)
+            $piv = intval($str[$h]);
+        $piv++;
+        if(!$isodd){
+            $fh[$end]=$piv;
+            $piv = "";
+        }
+    }else{
+        $piv = "";
+        $fh = str_split($str, $h);
+        $fh = $fh[0];
+        if($isodd)
+            $piv = $str[$h]; 
+    }
+    return $fh.$piv.strrev($fh);
+}
 function checknine($str){
     $isnine = true;
     for($i=0;$i<strlen($str);$i++){

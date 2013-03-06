@@ -118,11 +118,9 @@ class Dijkstra {
 		return $foo;
 	}
 } // end class 
-
 /** Example usage
  *
- * 
-// I is the infinite distance.
+ * // I is the infinite distance.
 define('I',1000);
  
 // Size of the matrix

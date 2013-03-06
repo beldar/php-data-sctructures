@@ -67,7 +67,6 @@ output:
 #include <string>
 #include <cstdlib>
 #include <cstdio>
-#include <sstream>
 
 using namespace std; 
 
@@ -116,9 +115,6 @@ char *itoa(int value,char *buf) {
 
 string nextpal(string str){
     if(str.length()>1000000) return "";
-    if(str[str.length()-1]=='\n')
-        str.erase(str.length()-1);
-    ostringstream os;
     int n = str.length();
     if(n==1 && str.compare("9")!=0){
         int a;
@@ -128,11 +124,11 @@ string nextpal(string str){
         return str;
     }else{
         if(checknine(str)){
-            os << "1";
-            for(int i=0;i<n;i++)
-                if(i==n-1) os << "1";
-                else os << "0";
-            return os.str();
+            str[0] = '1';
+            for(int i=1;i<n;i++)
+                str[i]='0';
+            str.append("1");
+            return str;
         }else{
             int h = n/2;
             bool isodd = (n%2==1);

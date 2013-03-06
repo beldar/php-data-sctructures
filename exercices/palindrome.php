@@ -72,6 +72,7 @@ while($op = array_pop($fifo)){
     print nextpal(trim($op))."\n";
 }
 function nextpal($str){
+    if(strlen($str)>1000000) return;
     if(strlen($str)==1 && $str!="9")
         return ++$str;
     elseif(checknine($str)){
@@ -103,7 +104,7 @@ function nextpal($str){
             if($i==0 || $str[$i]<$str[$j])
                 $ls = true;
             if($i==0 && $str[$i]>$str[$j]){
-                $str[$j] = $str[$j]+1;
+                $str[$j] = $str[0];
                 return $str;
             }
             if($ls){
@@ -133,6 +134,40 @@ function nextpal($str){
 
 function getmirror($str,$h,$isodd,$ls){
     if($ls){
+        if($isodd)
+            $piv=$str[$h];
+        else
+            $piv=$str[$h1];
+        $piv++;
+        if(!$isodd)
+            $str[$h-1] = $piv;
+        else
+            $str[$h] = $piv;
+        for($i=$n-1;$i>=$h;$i--)
+            $str[$i] = $str[$n-$i-1];
+        return $str;
+    }else{
+        if($isodd)
+            $str[$h+1] = $str[$h];
+        for($i=$n-1;$i>=$h;$i--)
+            $str[$i] = $str[$n-$i-1];
+        return $str;
+    }
+}
+
+function checknine($str){
+    $isnine = true;
+    for($i=0;$i<strlen($str);$i++){
+        if($str[$i]!="9"){
+            $isnine = false;
+            break;
+        }    
+    }
+    return $isnine;
+}
+/* Previous
+ * function getmirror($str,$h,$isodd,$ls){
+    if($ls){
         $fh = str_split($str, $h);
         $fh = $fh[0];
         $end = strlen($fh)-1;
@@ -152,17 +187,7 @@ function getmirror($str,$h,$isodd,$ls){
             $piv = $str[$h]; 
     }
     return $fh.$piv.strrev($fh);
-}
-function checknine($str){
-    $isnine = true;
-    for($i=0;$i<strlen($str);$i++){
-        if($str[$i]!="9"){
-            $isnine = false;
-            break;
-        }    
-    }
-    return $isnine;
-}
+}*/
 /**
  * Version 4
  * function nextpal($str){

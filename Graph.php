@@ -175,21 +175,11 @@ class Graph {
     }
     
     public function isAcyclic(){
-        if(!$this->_isdirected) return false;
-        else{
-            foreach($this->_adjency as $s=>$ds)
-                foreach($ds as $d=>$v)
-                    if($d!=$s)
-                        $this->_nodes[$d]->setAttr('visited',true);
-            $cyclic = true;
-            foreach($this->_nodes as $node){
-                if(!$node->getAttr('visited'))
-                    $cyclic = false;
-                $node->remAttr('visited');
-            }
-                
-            return !$cyclic;
-        }
+        if(!$this->_isdirected)
+            return false;
+        $topological = array();
+        $this->DFS($topological);
+        return $this->_assertAcyclic($topological);
     }
     
     private function _initSingleSource($s){
@@ -239,36 +229,62 @@ class Graph {
         return true;            
     }
     
-    public function TopologicalSort(){
-        //TODO
+    public function TopologicalSort($assertAC=false){
+        if(!$this->_isdirected)
+            throw new Exception("Can't do a Topological sort on a non Directional Graph");
+        $topological = array();
+        $this->DFS($topological);
+        if(!$assertAC || $this->_assertAcyclic($topological))
+            return $topological;
+        else
+            return false;
     }
     
-    public function DFS(){
+    private function _assertAcyclic($t){
+        foreach($t as $node){
+            $p = $node->getAttr('p');
+            while($p!==false){
+                if($this->edgeExists($node->getKey(), $p->getKey()))
+                        return false;
+                $p = $p->getAttr('p');
+            }
+        }
+        return true;
+    }
+    
+    public function DFS(&$topological=false){
         // 1 => WHITE, 2 => GRAY, 3 => BLACK
         foreach($this->_nodes as $node)
             $node->setAttr('color',1)->setAttr('p',false)->setAttr('d',0);
         $time = 0;
         foreach($this->_nodes as $node)
             if($node->getAttr('color')==1)
-                $this->_DFSvisit($node->getKey(),$time);
+                $this->_DFSvisit($node->getKey(),$time,$topological);
     }
     
-    private function _DFSvisit($u,&$t){
+    private function _DFSvisit($u,&$t,&$topological=false){
         $t++;
         $un = $this->_nodes[$u];
         $un->setAttr('d',$t)->setAttr('color',2);
-        foreach($this->_adjency[$u] as $v=>$w){
-            $vn =& $this->_nodes[$v];
-            if($vn->getAttr('color')==1){
-                $vn->setAttr('p',$un);
-                $this->_DFSvisit($v, $t);
+        if(isset($this->_adjency[$u])){
+            foreach($this->_adjency[$u] as $v=>$w){
+                $vn =& $this->_nodes[$v];
+                if($vn->getAttr('color')==1){
+                    $vn->setAttr('p',$un);
+                    $this->_DFSvisit($v, $t,$topological);
+                }
             }
         }
         $un->setAttr('color',3);
         $t++;
         $un->setAttr('f',$t);
+        if($topological!==false)
+            array_unshift($topological,$un);
     }
     
+    public function Dijkstra($s,$wf=false){
+        $this->_initSingleSource($s);
+    }
     
 
 }
@@ -276,15 +292,19 @@ $node = new GraphNode(1);
 $g = new Graph(true);
 $g->addNode($node);
 $g->addNode(2);
-$g->addNode(3)->addNode(4);
-$g->addEdge(1, 2)->addEdge(2, 4)->addEdge(4, 3)->addEdge(3,1);
+$g->addNode(3)->addNode(4)->addNode(5);
+$g->addEdge(1,5)->addEdge(2,1)->addEdge(3,1)->addEdge(3,4)->addEdge(2,5)->addEdge(4,5);//Acyclic
+//$g->addEdge(1,2)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2); //Cyclic
 $g->printgraph();
+echo "Is acyclic:";
 var_dump($g->isAcyclic());
-//$g->dumpnodes();
-$g->addNode(5)->addEdge(5,1)->addEdge(1,5);
-$g->printgraph();
-var_dump($g->isAcyclic());
-$g->DFS();
+$t = $g->TopologicalSort();
+if($t){
+    foreach($t as $n)
+        echo $n->getKey().",";
+    echo "\n";
+}
+//var_dump($t);
 $g->printNodes(array('d','f'));
 /*$g->removeEdge(5,5);
 $g->printgraph();

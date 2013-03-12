@@ -282,6 +282,16 @@ class Graph {
             array_unshift($topological,$un);
     }
     
+    /**
+     * For few number of edges this implementation is better, example for 10 nodes
+     * 
+     * Dijkstra implementation without Priority Queue: 0.00043702125549316 seconds
+     * Dijkstra implementation with Priority Queue: 0.02269983291626 seconds
+     * 
+     * @param int $s source node
+     * @param int $d destination node (optional)
+     * @param type $wf weight function (optional)
+     */
     public function Dijkstra($s,$d=false,$wf=false){
         $this->_initSingleSource($s);
         $q = $this->_nodes;
@@ -295,6 +305,41 @@ class Graph {
                 if(isset($q[$v])){
                     $this->_relax($u->getKey(), $v, $wf);
                     $q[$v] = $this->_nodes[$v];
+                }
+            }
+        }
+    }
+    
+    /**
+     * For large number of edges this implementation is better, example with 1000 nodes forming a big cycle
+     * 0 => 1 => 2 => ... => 998 => 999
+     * Dijkstra implementation without Priority Queue: 0.97381496429443 secon
+     * Dijkstra implementation with Priority Queue: 0.089359045028687 seconds
+     * 
+     * @param int $s source node
+     * @param int $d destination node (optional)
+     * @param type $wf weight function (optional)
+     */
+    public function DijkstraPQ($s,$d=false,$wf=false){
+        $this->_initSingleSource($s);
+        $q = new PriorityDistance();
+        foreach($this->_nodes as $n)
+            $q->insert ($n->getKey(), $n->getAttr('d'));
+        while($q->valid()){
+            $u = $q->extract();
+            $u = $this->_nodes[$u];
+            if($d && $u->getKey()==$d)
+                return $this->_pathTo($d);
+            if($u->getAttr('d')===INF)
+                break;
+            foreach($this->_adjency[$u->getKey()] as $v=>$w){
+                $alt = $u->getAttr('d')+$w;
+                $vn = $this->_nodes[$v];
+                $vd = $vn->getAttr('d');
+                if($alt < $vd){
+                    $vn->setAttr('d',$alt);
+                    $vn->setAttr('p',$u);
+                    $q->insert($v,$alt);
                 }
             }
         }
@@ -328,14 +373,28 @@ class Graph {
     
 
 }
+class PriorityDistance extends SplPriorityQueue{
+    public function compare($p1,$p2){
+        if($p1 < $p2)
+            return 1;
+        if($p1 === $p2)
+            return 0;
+        return -1;
+    }
+}
+
 $node = new GraphNode(1);
 $g = new Graph(true);
-$g->addNode($node);
+/*$g->addNode($node);
 $g->addNode(2);
-$g->addNode(3)->addNode(4)->addNode(5);
+$g->addNode(3)->addNode(4)->addNode(5)->addNode(6)->addNode(7)->addNode(8)->addNode(9)->addNode(10);
 //$g->addEdge(1,5)->addEdge(2,1)->addEdge(3,1)->addEdge(3,4)->addEdge(2,5)->addEdge(4,5);//Acyclic
-$g->addEdge(1,2,10)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2)->addEdge(3,5)->addEdge(1,3); //Cyclic
-$g->printgraph();
+$g->addEdge(1,2,10)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2)->addEdge(3,5)->addEdge(1,3)->addEdge(5,6)->addEdge(6,7)->addEdge(7,8)->addEdge(8,9)->addEdge(9,10)->addEdge(10,6); //Cyclic
+$g->printgraph();*/
+for($i=0;$i<1000;$i++)
+    $g->addNode($i);
+for($i=1;$i<1000;$i++)
+    $g->addEdge($i-1,$i);
 /*echo "Is acyclic:";
 var_dump($g->isAcyclic());
 $t = $g->TopologicalSort();
@@ -344,11 +403,22 @@ if($t){
         echo $n->getKey().",";
     echo "\n";
 }*/
-$nodes = $g->Dijkstra(1,5);
-foreach($nodes as $n)
+$bt = microtime(true);
+$nodes = $g->Dijkstra(1,999);
+$at = microtime(true); 
+/*foreach($nodes as $n)
+    echo $n->getKey()." -> ";*/
+//echo "Path ".reset($nodes)." => ".end($nodes)."\n";
+echo "Dijkstra implementation without Priority Queue: ".($at-$bt)." seconds\n";
+$bt = microtime(true);
+$nodes = $g->DijkstraPQ(1,999);
+$at = microtime(true); 
+/*foreach($nodes as $n)
     echo $n->getKey()." -> ";
-echo "\n";
-$g->printNodes(array('d'));
+echo "\n";*/
+//echo "Path ".reset($nodes)." => ".end($nodes)."\n";
+echo "Dijkstra implementation with Priority Queue: ".($at-$bt)." seconds\n";
+//$g->printNodes(array('d'));
 /*$g->removeEdge(5,5);
 $g->printgraph();
 $g->removeNode(1);

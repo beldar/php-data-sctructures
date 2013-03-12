@@ -282,8 +282,48 @@ class Graph {
             array_unshift($topological,$un);
     }
     
-    public function Dijkstra($s,$wf=false){
+    public function Dijkstra($s,$d=false,$wf=false){
         $this->_initSingleSource($s);
+        $q = $this->_nodes;
+        while(count($q)>0){
+            $u = $this->_getMinDist($q); //Search and remove from $q
+            if($d && $u->getKey()==$d)
+                return $this->_pathTo($d);
+            if($u->getAttr('d')===INF)
+                break;
+            foreach($this->_adjency[$u->getKey()] as $v=>$w){
+                if(isset($q[$v])){
+                    $this->_relax($u->getKey(), $v, $wf);
+                    $q[$v] = $this->_nodes[$v];
+                }
+            }
+        }
+    }
+    
+    private function _pathTo($d){
+        $s = array();
+        $u = $this->_nodes[$d];
+        $p = $u->getAttr('p');
+        while($p!=false){
+            array_unshift($s,$p);
+            $p = $p->getAttr('p');
+        }
+        $s[] = $u;
+        return $s;
+    }
+    
+    private function _getMinDist(&$nodes){
+        $mindist = INF;
+        $minnode = false;
+        foreach($nodes as $key=>$n){
+            if($n->getAttr('d')<=$mindist){
+                $mindist = $n->getAttr('d');
+                $minnode = $key;
+            }
+        }
+        $n = $nodes[$minnode];
+        unset($nodes[$minnode]);
+        return $n;
     }
     
 
@@ -293,19 +333,22 @@ $g = new Graph(true);
 $g->addNode($node);
 $g->addNode(2);
 $g->addNode(3)->addNode(4)->addNode(5);
-$g->addEdge(1,5)->addEdge(2,1)->addEdge(3,1)->addEdge(3,4)->addEdge(2,5)->addEdge(4,5);//Acyclic
-//$g->addEdge(1,2)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2); //Cyclic
+//$g->addEdge(1,5)->addEdge(2,1)->addEdge(3,1)->addEdge(3,4)->addEdge(2,5)->addEdge(4,5);//Acyclic
+$g->addEdge(1,2,10)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2)->addEdge(3,5)->addEdge(1,3); //Cyclic
 $g->printgraph();
-echo "Is acyclic:";
+/*echo "Is acyclic:";
 var_dump($g->isAcyclic());
 $t = $g->TopologicalSort();
 if($t){
     foreach($t as $n)
         echo $n->getKey().",";
     echo "\n";
-}
-//var_dump($t);
-$g->printNodes(array('d','f'));
+}*/
+$nodes = $g->Dijkstra(1,5);
+foreach($nodes as $n)
+    echo $n->getKey()." -> ";
+echo "\n";
+$g->printNodes(array('d'));
 /*$g->removeEdge(5,5);
 $g->printgraph();
 $g->removeNode(1);

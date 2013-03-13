@@ -252,8 +252,33 @@ class Graph {
         return true;
     }
     
+    public function BFS($s){
+        // 1 => WHITE, 2 => GRAY, 3 => BLACK, as seen on CLRS
+        if(!isset($this->_nodes[$s]))
+            throw new Exception("Node doesn't exist");
+        else
+            $s = $this->_nodes[$s];
+        foreach($this->_nodes as $node)
+            $node->setAttr('color',1)->setAttr('p',false)->setAttr('d',INF);
+        $s->setAttr('color',2)->setAttr('d',0);
+        $q = array();
+        array_unshift($q,$s);
+        while(count($q)>0){
+            $u = array_pop($q);
+            foreach($this->_adjency[$u->getKey()] as $v=>$w){
+                $vn = $this->_nodes[$v];
+                if($vn->getAttr('color')==1){
+                    //Not visited
+                    $vn->setAttr('color',2)->setAttr('d',$u->getAttr('d')+1)->setAttr('p',$u);
+                    array_unshift($q, $vn);
+                }
+            }
+            $u->setAttr('color',3);
+        }
+    }
+    
     public function DFS(&$topological=false){
-        // 1 => WHITE, 2 => GRAY, 3 => BLACK
+        // 1 => WHITE, 2 => GRAY, 3 => BLACK, as seen on CLRS
         foreach($this->_nodes as $node)
             $node->setAttr('color',1)->setAttr('p',false)->setAttr('d',0);
         $time = 0;
@@ -385,16 +410,19 @@ class PriorityDistance extends SplPriorityQueue{
 
 $node = new GraphNode(1);
 $g = new Graph(true);
-/*$g->addNode($node);
+$g->addNode($node);
 $g->addNode(2);
 $g->addNode(3)->addNode(4)->addNode(5)->addNode(6)->addNode(7)->addNode(8)->addNode(9)->addNode(10);
-//$g->addEdge(1,5)->addEdge(2,1)->addEdge(3,1)->addEdge(3,4)->addEdge(2,5)->addEdge(4,5);//Acyclic
-$g->addEdge(1,2,10)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2)->addEdge(3,5)->addEdge(1,3)->addEdge(5,6)->addEdge(6,7)->addEdge(7,8)->addEdge(8,9)->addEdge(9,10)->addEdge(10,6); //Cyclic
-$g->printgraph();*/
-for($i=0;$i<1000;$i++)
+$g->addEdge(1,5)->addEdge(2,1)->addEdge(1,3)->addEdge(3,4)->addEdge(2,5)->addEdge(4,5);//Acyclic
+//$g->addEdge(1,2,10)->addEdge(2,4)->addEdge(4,3)->addEdge(3,2)->addEdge(5,2)->addEdge(3,5)->addEdge(1,3)->addEdge(5,6)->addEdge(6,7)->addEdge(7,8)->addEdge(8,9)->addEdge(9,10)->addEdge(10,6); //Cyclic
+$g->printgraph();
+$g->dumpadj();
+$g->BFS(1);
+$g->printNodes(array('d','color'));
+/*for($i=0;$i<1000;$i++)
     $g->addNode($i);
 for($i=1;$i<1000;$i++)
-    $g->addEdge($i-1,$i);
+    $g->addEdge($i-1,$i);*/
 /*echo "Is acyclic:";
 var_dump($g->isAcyclic());
 $t = $g->TopologicalSort();
@@ -402,22 +430,22 @@ if($t){
     foreach($t as $n)
         echo $n->getKey().",";
     echo "\n";
-}*/
+}
 $bt = microtime(true);
 $nodes = $g->Dijkstra(1,999);
-$at = microtime(true); 
+$at = microtime(true); */
 /*foreach($nodes as $n)
-    echo $n->getKey()." -> ";*/
+    echo $n->getKey()." -> ";
 //echo "Path ".reset($nodes)." => ".end($nodes)."\n";
 echo "Dijkstra implementation without Priority Queue: ".($at-$bt)." seconds\n";
 $bt = microtime(true);
 $nodes = $g->DijkstraPQ(1,999);
-$at = microtime(true); 
+$at = microtime(true); */
 /*foreach($nodes as $n)
     echo $n->getKey()." -> ";
-echo "\n";*/
+echo "\n";
 //echo "Path ".reset($nodes)." => ".end($nodes)."\n";
-echo "Dijkstra implementation with Priority Queue: ".($at-$bt)." seconds\n";
+echo "Dijkstra implementation with Priority Queue: ".($at-$bt)." seconds\n";*/
 //$g->printNodes(array('d'));
 /*$g->removeEdge(5,5);
 $g->printgraph();

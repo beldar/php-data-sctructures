@@ -1,8 +1,9 @@
 <?php
 
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * MaxHeap implementation using array
+ * 
+ * @author Martí Planellas
  */
 
 class MaxHeap{
@@ -33,7 +34,7 @@ class MaxHeap{
     }
     
     public function parent($i){
-        return floor($i/2);
+        return floor(($i-1)/2);
     }
     
     public function height($i){
@@ -49,15 +50,30 @@ class MaxHeap{
     }
     
     public function insert($e){
-        array_unshift($this->a,$e);
+        $this->a[] = $e;
         $this->hsize++;
         $this->length++;
+        $i = $this->hsize-1;
+        $p = $this->parent($i);
+        while($p>=0 && $this->a[$p]<$this->a[$i]){
+            $this->swap($p, $i);
+            $i = $p;
+            $p = $this->parent($i);
+        }
+    }
+    
+    public function extract(){
+        $r = reset($this->a);
+        $last = array_pop($this->a);
+        $this->a[0] = $last;
+        $this->hsize--;
+        $this->length--;
         $this->maxheapify(0);
+        return $r;
     }
     
     public function printl(){
         $lvl = 0;
-        $s = $this->a[0];
         $q = array();
         $q[0] = array();
         $q[0][] = $this->a[0];
@@ -65,22 +81,23 @@ class MaxHeap{
         $this->_printl($this->right(0),$lvl+1,$q);
         $out = "";
         $sp = pow(2,count($q))*2;
+        $totalh = $this->height($this->hsize);
         foreach($q as $lvl=>$nodes){
             $sp = floor($sp/2);
             $sp2 = $sp-floor(count($nodes)/2);
             $i=1;
-            //if($lvl==count($nodes)-1) $sp = $sp2;
-            //echo $sp."\n";
             foreach($nodes as $node){
                 if($i%2==0) $sp2 += $sp2;
-                else $sp2 = $sp-floor(count($nodes)/2);
+                else $sp2 = $sp-$totalh;
+                if($sp2<4) $sp2+=2;
                 $out .= sprintf("%".$sp."s%-".$sp2."s",$node," ");
                 $i++;
             }
-            $out .= "\n";
+            $out .= "\n\n";
         }
         echo $out;
     }
+    
     public function _printl($i,$lvl,&$q){
         if($i<$this->hsize){
             if(!isset($q[$lvl])) $q[$lvl] = array();
@@ -128,12 +145,14 @@ class MaxHeap{
     }  
 }
 $a = array(4,1,3,2,16,9,10,14,8,7,3,2,1,5,7,8,10,23);
-var_dump($a);
 $mh = new MaxHeap($a);
-var_dump($mh->getA());
-//$mh->insert(20);
-//var_dump($mh->getA());
 $mh->printl();
-//var_dump($mh->heapsort());
+$mh->insert(20);
+echo "Inserted 20\n";
+$mh->printl();
+$e = $mh->extract();
+echo "Extracted $e\n";
+$mh->printl();
+var_dump($mh->heapsort());
 
 ?>

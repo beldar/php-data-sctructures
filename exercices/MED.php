@@ -140,7 +140,8 @@ class MinEditDist{
             if($i==0) $out .= "   ";
             else $out .= $this->str1[$i-1]."  ";
             for($j=0;$j<count($this->distMatrix[$i]);$j++)
-                $out .= $this->distMatrix[$i][$j].($this->distMatrix[$i][$j]>9 ? " ": "  ");
+                $out .= $this->distMatrix[$i][$j].
+                        ($this->distMatrix[$i][$j]>9 ? " ": "  ");
             $out .= "\n";
         }
         echo $out;

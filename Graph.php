@@ -74,6 +74,15 @@ class Graph {
         if($directed) $this->_isdirected = true;
     }
     
+    public function searchNodeData($data){
+        $keys = array();
+        foreach($this->_nodes as $n){
+            if($n->getData()==$data)
+                $keys[] = $n->getKey();
+        }
+        return $keys;
+    }
+    
     public function addNode($newnode){
         if(is_int($newnode)) $newnode = new GraphNode($newnode);
         $key = $newnode->getKey();
